@@ -1,4 +1,9 @@
-D:\DATA\Python\Tdata_unpack\all_telegrams/161\+6283168567680/Telegram.exe
-D:\DATA\Python\Tdata_unpack\all_telegrams/162\+6283171374335/Telegram.exe
-D:\DATA\Python\Tdata_unpack\all_telegrams/163\+6283171377960/Telegram.exe
-D:\DATA\Python\Tdata_unpack\all_telegrams/164\+6283171378315/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/141\+62859206732988/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/142\+62859206732989/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/143\+62859210586001/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/144\+62859210594071/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/145\+62859210594072/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/146\+62859210594073/Telegram.exe
+d:\DATA\Python\Tdata_unpack\all_telegrams/147\+62859210594076/Telegram.exe
+D:\DATA\Python\Tdata_unpack\all_telegrams/148\+6283167543398/Telegram.exe
+D:\DATA\Python\Tdata_unpack\all_telegrams/149\+6283167544765/Telegram.exe

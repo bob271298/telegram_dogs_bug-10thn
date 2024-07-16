@@ -7,6 +7,7 @@ import time
 from random_word import RandomWords
 import pyperclip
 import psutil
+from loguru import logger
 
 
 class TelegramApp:
@@ -25,7 +26,7 @@ class TelegramApp:
             time.sleep(0.2)
             if not wait_while_img_dissapear(self.main_window, 'templates\\telegram\\network_loading.png', 0.5, time_to_wait*2, 0.95):
                 raise Exception(f'Telegram not loaded in {time_to_wait} sec')
-            print('telegram loaded successfully!')
+            logger.info('Telegram loaded successfully!')
 
 
     def get_window_center_coords(self, window):
@@ -79,11 +80,11 @@ class TelegramApp:
 
         if self.scroll_to_click(50, self.main_window, 'templates\\telegram\\inspection.png', 0, 1, 0.9, click=False):
             if click_on_img(self.main_window, 'templates\\telegram\\inspection_off.png', 0.5, 5, 0.9):
-                print('Webview inspecction ON!')
+                logger.info('Webview inspecction ON!')
             elif get_img_coords(self.main_window, 'templates\\telegram\\inspection_on.png', 0.5, 5, 0.9):
-                print('Webview inspecction already ON!')
+                logger.info('Webview inspecction already ON!')
             else:
-                print('Inspection not found!')
+                logger.info('Inspection not found!')
 
         self.key_cycle(self.main_window, '{ESC}', 4, 0.05)
 
@@ -97,21 +98,27 @@ class TelegramApp:
         send_keys(nickname)
 
 
-    def set_nickname(self, nickname, delay=0.2):
+    def set_nickname(self, nickname, delay=0.2, change_if_already_set=False):
         click_on_img(self.main_window, 'templates\\telegram\\burger_menu.png', 0.5, 5, 0.7)
         click_on_img(self.main_window, 'templates\\telegram\\settings.png', 0.5, 5, 0.7)
         click_on_img(self.main_window, 'templates\\telegram\\my_account.png', 0.5, 5, 0.9)
         click_on_img(self.main_window, 'templates\\telegram\\change_username.png', 0.5, 5, 0.9)
 
+        if not change_if_already_set and not get_img_coords(self.main_window, 'templates\\telegram\\empty_username.png', 0.5, 5, 0.9):
+            logger.info('Username already setted!')
+            self.key_cycle(self.main_window, '{ESC}', 4, 0.05)
+            return True
+
         self.enter_new_text(nickname, delay)
         time.sleep(delay * 3)
 
         if get_img_coords(self.main_window, 'templates\\telegram\\username_available.png', 0.5, 10, 0.9):
-            click_on_img(self.main_window, 'templates\\telegram\\save.png', 0.5, 5, 0.8)
-            self.key_cycle(self.main_window, '{ESC}', 4, 0.05)
-            return True
+            if click_on_img(self.main_window, 'templates\\telegram\\save.png', 0.5, 5, 0.8):
+                logger.info('Username successfully setted!')
+                self.key_cycle(self.main_window, '{ESC}', 4, 0.05)
+                return True
         
-        return False
+        raise Exception('Username do not setted!')
     
 
     def write_to_saved_messages(self, message, delay=0.2):
@@ -127,26 +134,24 @@ class TelegramApp:
         self.main_window.set_focus()
         time.sleep(0.5)
         send_keys('^q')
+        logger.info("Telegram closed with ^q.")
 
     
     @staticmethod
     def stop_telegram_processes():
-    # Проходимося по всіх процесах
         for process in psutil.process_iter(['pid', 'name']):
             try:
-                # Якщо ім'я процесу містить 'Telegram', завершуємо процес
                 if 'Telegram' in process.info['name']:
                     p = psutil.Process(process.info['pid'])
-                    p.terminate()  # Завершення процесу
-                    p.wait()  # Очікуємо завершення процесу
-                    print(f"Процес Telegram з PID {process.info['pid']} був зупинений.")
+                    p.terminate()
+                    p.wait()
+                    logger.warning(f"Telegram process - PID {process.info['pid']} was stopped.")
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
 
     
     @staticmethod
     def is_proxifier_running():
-        # Перевірка наявності процесу Proxifier серед активних процесів
         for process in psutil.process_iter(['name']):
             if process.info['name'] == 'Proxifier.exe':
                 return True
@@ -180,7 +185,7 @@ class TelegramDogs(TelegramApp):
                 break
 
     
-    def launch_dogs(self, link, sleep_before_launch=3, tries_count=5):
+    def launch_dogs(self, link, sleep_before_launch=3, tries_count=30):
         time.sleep(2)
         old_windows = list(self.app.windows())
 
@@ -190,27 +195,31 @@ class TelegramDogs(TelegramApp):
             if click_on_img(self.main_window, 'templates\\dogs\\launch.png', 0.5, 2, 0.9):
                 break
 
-        if get_img_coords(self.main_window, 'templates\\dogs\\allow_msg.png', 0.5, 10, 0.9):
-            click_on_img(self.main_window, 'templates\\dogs\\OK.png', 0.5, 5, 0.9)
-
-
         for i in range(tries_count):
-            new_windows = list(self.app.windows())
+            if get_img_coords(self.main_window, 'templates\\dogs\\allow_msg.png', 0.5, 10, 0.9):
+                click_on_img(self.main_window, 'templates\\dogs\\OK.png', 0.5, 5, 0.9)
 
+            new_windows = list(self.app.windows())
             if len(new_windows) > len(old_windows):
                 unique_windows = [w for w in new_windows if w not in old_windows]
                 self.dogs_window = unique_windows[0]
                 if self.dogs_window:
-                    break
+                    logger.info('Dogs window successfully launched!')
+                    return True
             time.sleep(1)
 
+        raise Exception('Dogs window do not launched.')
+    
 
     def work_with_dogs(self):
-        click_on_img(self.dogs_window, 'templates\\dogs\\start_dogs.png', 0.5, 20, 0.9)
+        if not click_on_img(self.dogs_window, 'templates\\dogs\\start_dogs.png', 0.5, 60, 0.9):
+            raise Exception('First button on Dogs not found!')
         time.sleep(8)
-        click_on_img(self.dogs_window, 'templates\\dogs\\continue_blue.png', 0.5, 20, 0.9)
-        click_on_img(self.dogs_window, 'templates\\dogs\\continue_white.png', 0.5, 20, 0.9)
-        click_on_img(self.dogs_window, 'templates\\dogs\\continue_white.png', 0.5, 20, 0.9)
+        click_on_img(self.dogs_window, 'templates\\dogs\\continue_blue.png', 0.5, 40, 0.9)
+        click_on_img(self.dogs_window, 'templates\\dogs\\continue_white.png', 0.5, 40, 0.9)
+        if not click_on_img(self.dogs_window, 'templates\\dogs\\continue_white.png', 0.5, 40, 0.9):
+            raise Exception('Last button on Dogs not found!')
+        logger.info('Dogs successfully claimed!')
 
 
 

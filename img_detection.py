@@ -57,8 +57,6 @@ def get_search_on_image(screenshot, template_path, threshold):
     # for pt1, pt2 in match_coordinates:
     #     cv2.rectangle(result_img, pt1, pt2, (0, 0, 255), 1)
 
-    # print(len(match_coordinates))
-
     # # Відображаємо скріншот з результатами
     # cv2.imshow('Result', result_img)
     # cv2.waitKey(0)
@@ -99,6 +97,20 @@ def wait_while_img_dissapear(window, template_path, delay, tries_count, threshol
             return True
         time.sleep(delay)
     return False
+
+
+def find_first_image(params_list, wait_time=60):
+    lap_time = 0.5 * len(params_list)
+    iterations_count = int(wait_time / lap_time) + 1
+    if lap_time > wait_time:
+        raise Exception("Wait time too small to do at least one lap!")
+    for i in range(iterations_count):
+        for params in params_list:
+            if get_img_coords(*params):
+                return params[1]
+    return False
+    
+
 
 
 def click_on_img(window, template_path, delay, tries_count, threshold) -> None:
