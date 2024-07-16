@@ -19,7 +19,7 @@ def main_dogs():
     with open('all_pathes.txt', 'r', encoding='utf-8') as fileobj:
         pathes_list = fileobj.readlines()
 
-    for i in pathes_list[:5]:                               #remove slice
+    for i in pathes_list:
         try:
             if i.find('all_telegrams') != -1:
                 short_path = i[i.index('all_telegrams')+13:].strip()
