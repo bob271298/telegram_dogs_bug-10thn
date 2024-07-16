@@ -13,40 +13,53 @@ def main_hot():
 
 
 def main_dogs():
+    TRIES_COUNT = 3
+    
+    
     with open('all_refs.txt', 'r', encoding='utf-8') as fileobj:
         ref_links = fileobj.readlines()
 
     with open('all_pathes.txt', 'r', encoding='utf-8') as fileobj:
         pathes_list = fileobj.readlines()
 
-    for i in pathes_list:
-        try:
-            if i.find('all_telegrams') != -1:
-                short_path = i[i.index('all_telegrams')+13:].strip()
-            else:
-                short_path = i[-40:]
+    for path in pathes_list:
+        for i in range(TRIES_COUNT):
+            try:
+                if path.find('all_telegrams') != -1:
+                    short_path = path[path.index('all_telegrams')+13:].strip()
+                else:
+                    short_path = path[-40:]
 
-            if TelegramDogs.is_proxifier_running():
-                logger.info(f"Start account ...{short_path}")
+                if TelegramDogs.is_proxifier_running():
+                    logger.info(f"Start account ...{short_path}")
 
-                ref_link = random.choice(ref_links).strip()
-                logger.info(f"Account referal: {ref_link[ref_link.index('?'):]}")
+                    ref_link = random.choice(ref_links).strip()
+                    logger.info(f"Account referal: {ref_link[ref_link.index('?'):]}")
 
-                TelegramDogs.stop_telegram_processes()
-                time.sleep(1)
-                telegramDogs = TelegramDogs(i.strip())
-                telegramDogs.set_random_nicknames(10)
-                telegramDogs.launch_dogs(ref_link)
-                telegramDogs.work_with_dogs()
-                time.sleep(0.3)
-                telegramDogs.quit_telegram()
-                time.sleep(1)
-            else:
-                logger.warning('Launch proxyfier firstly')
-        except Exception as e:
-            logger.error(f'Error: {e}')
-        finally:
-            logger.info(f"Finish account ...{short_path}\n")
+                    TelegramDogs.stop_telegram_processes()
+                    time.sleep(1)
+                    telegramDogs = TelegramDogs(path.strip())
+                    telegramDogs.set_random_nicknames(10)
+                    telegramDogs.launch_dogs(ref_link)
+                    telegramDogs.work_with_dogs()
+                    time.sleep(0.3)
+                    telegramDogs.quit_telegram()
+                    time.sleep(1)
+                    break
+                else:
+                    logger.warning('Launch proxyfier firstly')
+                    return 0
+            except Exception as e:
+                logger.error(f'Error: {str(e).strip()}')
+                logger.warning(f"TRY {i+1}/{TRIES_COUNT}")
+                if i+1 < TRIES_COUNT:
+                    continue
+                else:
+                    with open('bad_accounts.txt', 'a', encoding='utf-8') as fileobj:
+                        fileobj.write(path + '\n')
+            finally:
+                logger.info(f"Finish account ...{short_path}\n")
+    input()
 
 
 
